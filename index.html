@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>URL to PDF</title>
+</head>
+<body>
+  <h1>Convert a Webpage to PDF</h1>
+  <form id="form">
+    <input type="text" id="url" placeholder="Enter URL" required style="width: 300px;">
+    <button type="submit">Convert & Download</button>
+  </form>
+  <p id="status"></p>
+  <script>
+    const form = document.getElementById('form');
+    const status = document.getElementById('status');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const url = document.getElementById('url').value;
+      status.textContent = 'Converting...';
+
+      try {
+        const response = await fetch('/convert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: url })
+        });
+
+        if (!response.ok) throw new Error("Failed to convert");
+
+        const blob = await response.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'converted.pdf';
+        a.click();
+        status.textContent = 'Done!';
+      } catch (err) {
+        status.textContent = 'Error: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>

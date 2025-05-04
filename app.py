@@ -1,31 +1,27 @@
-from flask import Flask, request, send_file
-import os
-import subprocess
-import uuid
+from flask import Flask, request, send_file, send_from_directory
+import os, subprocess, uuid
 
 app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return send_from_directory('.', 'index.html')
 
 @app.route('/convert', methods=['POST'])
 def convert():
     data = request.get_json()
-    url = data.get('url')
-
+    url = data.get("url")
     if not url:
-        return {"error": "No URL provided"}, 400
+        return {"error": "URL is required"}, 400
 
-    # Generate unique filename
     filename = f"{uuid.uuid4().hex}.pdf"
     filepath = os.path.join("/tmp", filename)
 
     try:
-        # Convert URL to PDF using wkhtmltopdf
         subprocess.run(["wkhtmltopdf", url, filepath], check=True)
-
-        return send_file(filepath, as_attachment=True, download_name=filename)
-
-    except subprocess.CalledProcessError:
+        return send_file(filepath, as_attachment=True, download_name="converted.pdf")
+    except subprocess.CalledProcessError as e:
         return {"error": "Conversion failed"}, 500
-
     finally:
         if os.path.exists(filepath):
             os.remove(filepath)

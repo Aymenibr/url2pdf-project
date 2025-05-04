@@ -1,17 +1,21 @@
 FROM python:3.11-slim
 
-# Install dependencies
-RUN apt-get update && \
-    apt-get install -y wkhtmltopdf curl && \
-    pip install flask && \
+# Install wkhtmltopdf and curl
+RUN apt-get update && apt-get install -y \
+    wkhtmltopdf curl && \
     apt-get clean
 
-# Copy project files
-COPY app.py /app/app.py
+# Set working directory
 WORKDIR /app
 
-# Expose Flask port
+# Copy your app code
+COPY app.py index.html ./
+
+# Install Flask
+RUN pip install flask
+
+# Expose port
 EXPOSE 5000
 
-# Run the app
+# Run Flask app
 CMD ["python", "app.py"]
