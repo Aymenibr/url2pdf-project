@@ -1,30 +1,117 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>URL to PDF</title>
+  <meta charset="UTF-8">
+  <title>URL to PDF Converter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to bottom right, #f0f4f8, #d9e2ec);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 14px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px 20px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #status {
+      margin-top: 15px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #007BFF;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      margin: 10px auto;
+      display: none;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
-  <h1>Convert a Webpage to PDF</h1>
-  <form id="form">
-    <input type="text" id="url" placeholder="Enter URL" required style="width: 300px;">
-    <button type="submit">Convert & Download</button>
-  </form>
-  <p id="status"></p>
+  <div class="container">
+    <h1>Convert URL to PDF</h1>
+    <form id="form">
+      <input type="text" id="url" placeholder="Enter a valid URL..." required>
+      <button type="submit">Convert & Download</button>
+    </form>
+    <div class="spinner" id="spinner"></div>
+    <p id="status"></p>
+  </div>
+
   <script>
     const form = document.getElementById('form');
     const status = document.getElementById('status');
+    const spinner = document.getElementById('spinner');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const url = document.getElementById('url').value;
-      status.textContent = 'Converting...';
+      status.textContent = '';
+      spinner.style.display = 'block';
 
       try {
         const response = await fetch('/convert', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: url })
+          body: JSON.stringify({ url })
         });
+
+        spinner.style.display = 'none';
 
         if (!response.ok) throw new Error("Failed to convert");
 
@@ -33,8 +120,9 @@
         a.href = URL.createObjectURL(blob);
         a.download = 'converted.pdf';
         a.click();
-        status.textContent = 'Done!';
+        status.textContent = 'PDF downloaded successfully!';
       } catch (err) {
+        spinner.style.display = 'none';
         status.textContent = 'Error: ' + err.message;
       }
     });
